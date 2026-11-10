@@ -166,29 +166,9 @@
             <h2 class="text-lg font-bold text-white">ผลคะแนนเฉลี่ยรายข้อ (1 – 5)</h2>
             <p class="text-xs text-slate-400">ประเมินคุณภาพการจัดอบรมครอบคลุมทั้ง 5 ด้าน</p>
           </div>
-          <div class="flex items-center space-x-2">
-            <div class="bg-slate-900/90 p-1 rounded-2xl border border-slate-700/80 flex items-center space-x-1">
-              <button
-                type="button"
-                id="btnViewDonut"
-                onclick="setChartView('donut')"
-                class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 bg-indigo-600 text-white shadow-md transition"
-              >
-                <span>⭕ กราฟวงกลม</span>
-              </button>
-              <button
-                type="button"
-                id="btnViewBar"
-                onclick="setChartView('bar')"
-                class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 text-slate-400 hover:text-white transition"
-              >
-                <span>📊 กราฟแท่ง</span>
-              </button>
-            </div>
-            <span class="text-xs px-3 py-1.5 rounded-xl bg-slate-700/60 text-slate-300 font-medium hidden sm:inline-block">
-              คะแนนเต็ม 5.00
-            </span>
-          </div>
+          <span class="text-xs px-3.5 py-1.5 rounded-xl bg-slate-700/60 text-slate-300 font-medium">
+            คะแนนเต็ม 5.00
+          </span>
         </div>
 
         <div id="questionsContainer" class="space-y-5">
@@ -451,191 +431,123 @@
       `).join('');
     }
 
-    let currentChartView = 'donut';
-    let cachedQuestionAverages = [];
-    let cachedTotalCount = 0;
-
-    function setChartView(view) {
-      currentChartView = view;
-      const btnDonut = document.getElementById('btnViewDonut');
-      const btnBar = document.getElementById('btnViewBar');
-      if (view === 'donut') {
-        btnDonut.className = "px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 bg-indigo-600 text-white shadow-md transition";
-        btnBar.className = "px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 text-slate-400 hover:text-white transition";
-      } else {
-        btnBar.className = "px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 bg-indigo-600 text-white shadow-md transition";
-        btnDonut.className = "px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 text-slate-400 hover:text-white transition";
-      }
-      if (cachedQuestionAverages.length > 0) {
-        renderQuestions(cachedQuestionAverages, cachedTotalCount);
-      }
-    }
-
     function renderQuestions(questionAverages, totalCount) {
-      cachedQuestionAverages = questionAverages;
-      cachedTotalCount = totalCount;
       const container = document.getElementById('questionsContainer');
 
-      if (currentChartView === 'donut') {
-        // RENDER CIRCULAR DONUT & PIE CHARTS
-        container.innerHTML = questionAverages.map(q => {
-          const interp = interpretLikert(q.average);
-          const radius = 38;
-          const circ = 2 * Math.PI * radius; // 238.76
-          const pct = (q.average / 5.0) * 100;
-          const strokeOffset = circ - (pct / 100) * circ;
+      // RENDER CIRCULAR DONUT & PIE CHARTS
+      container.innerHTML = questionAverages.map(q => {
+        const interp = interpretLikert(q.average);
+        const radius = 38;
+        const circ = 2 * Math.PI * radius; // 238.76
+        const pct = (q.average / 5.0) * 100;
+        const strokeOffset = circ - (pct / 100) * circ;
 
-          let strokeColor = '#10b981';
-          if (q.average < 2.5) strokeColor = '#f43f5e';
-          else if (q.average < 3.5) strokeColor = '#f59e0b';
-          else if (q.average < 4.5) strokeColor = '#14b8a6';
+        let strokeColor = '#10b981';
+        if (q.average < 2.5) strokeColor = '#f43f5e';
+        else if (q.average < 3.5) strokeColor = '#f59e0b';
+        else if (q.average < 4.5) strokeColor = '#14b8a6';
 
-          // Multi-segment donut for 1-5 stars
-          const starConfigs = [
-            { star: 5, label: 'มากที่สุด', count: q.distribution[5] || 0, color: '#10b981' },
-            { star: 4, label: 'มาก', count: q.distribution[4] || 0, color: '#14b8a6' },
-            { star: 3, label: 'ปานกลาง', count: q.distribution[3] || 0, color: '#f59e0b' },
-            { star: 2, label: 'น้อย', count: q.distribution[2] || 0, color: '#f97316' },
-            { star: 1, label: 'น้อยที่สุด', count: q.distribution[1] || 0, color: '#f43f5e' }
-          ];
+        // Multi-segment donut for 1-5 stars
+        const starConfigs = [
+          { star: 5, label: 'มากที่สุด', count: q.distribution[5] || 0, color: '#10b981' },
+          { star: 4, label: 'มาก', count: q.distribution[4] || 0, color: '#14b8a6' },
+          { star: 3, label: 'ปานกลาง', count: q.distribution[3] || 0, color: '#f59e0b' },
+          { star: 2, label: 'น้อย', count: q.distribution[2] || 0, color: '#f97316' },
+          { star: 1, label: 'น้อยที่สุด', count: q.distribution[1] || 0, color: '#f43f5e' }
+        ];
 
-          const dRadius = 34;
-          const dCirc = 2 * Math.PI * dRadius; // 213.63
-          let accLength = 0;
-          const totalV = q.count || 1;
+        const dRadius = 34;
+        const dCirc = 2 * Math.PI * dRadius; // 213.63
+        let accLength = 0;
+        const totalV = q.count || 1;
 
-          const segmentsSvg = starConfigs.map(s => {
-            const ratio = q.count > 0 ? s.count / totalV : 0;
-            const sLen = ratio * dCirc;
-            const dArray = `${sLen} ${dCirc - sLen}`;
-            const dOff = -accLength;
-            accLength += sLen;
-            return `<circle cx="50" cy="50" r="${dRadius}" fill="transparent" stroke="${s.color}" stroke-width="10" stroke-dasharray="${dArray}" stroke-dashoffset="${dOff}" class="transition-all duration-700"></circle>`;
-          }).join('');
+        const segmentsSvg = starConfigs.map(s => {
+          const ratio = q.count > 0 ? s.count / totalV : 0;
+          const sLen = ratio * dCirc;
+          const dArray = `${sLen} ${dCirc - sLen}`;
+          const dOff = -accLength;
+          accLength += sLen;
+          return `<circle cx="50" cy="50" r="${dRadius}" fill="transparent" stroke="${s.color}" stroke-width="10" stroke-dasharray="${dArray}" stroke-dashoffset="${dOff}" class="transition-all duration-700"></circle>`;
+        }).join('');
 
-          const legendHtml = starConfigs.map(s => {
-            const p = q.count > 0 ? Math.round((s.count / totalV) * 100) : 0;
-            return `
-              <div class="flex items-center space-x-1.5 bg-slate-900/90 px-2 py-1 rounded-xl border border-slate-800 text-[11px]">
-                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${s.color};"></span>
-                <span class="font-bold text-slate-300">${s.star}⭐</span>
-                <span class="text-slate-400 text-[10px] ml-1">${s.count} คน (${p}%)</span>
-              </div>
-            `;
-          }).join('');
-
+        const legendHtml = starConfigs.map(s => {
+          const p = q.count > 0 ? Math.round((s.count / totalV) * 100) : 0;
           return `
-            <div class="bg-slate-900/75 p-5 rounded-2xl border border-slate-700/80 transition-all hover:border-slate-600 shadow-md">
-              <div class="flex flex-wrap justify-between items-start gap-2 mb-4">
-                <div class="flex items-start space-x-3 max-w-xl">
-                  <span class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
-                    ${q.num}
-                  </span>
-                  <div>
-                    <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">
-                      ${q.title}
-                    </h3>
-                  </div>
-                </div>
-
-                <div class="flex items-center space-x-2">
-                  <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold border ${interp.class}">
-                    ${interp.label}
-                  </span>
-                  <div class="flex items-baseline space-x-1 font-mono">
-                    <span class="text-xl font-black text-white number-font">
-                      ${q.average.toFixed(2)}
-                    </span>
-                    <span class="text-xs text-slate-400">/ 5.0</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center pt-2 border-t border-slate-800">
-                <!-- Circular Score Gauge -->
-                <div class="md:col-span-4 flex items-center space-x-3.5 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
-                  <div class="relative w-24 h-24 flex-shrink-0">
-                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                      <circle cx="50" cy="50" r="${radius}" fill="transparent" stroke="#1e293b" stroke-width="8"></circle>
-                      <circle cx="50" cy="50" r="${radius}" fill="transparent" stroke="${strokeColor}" stroke-width="8" stroke-dasharray="${circ}" stroke-dashoffset="${strokeOffset}" stroke-linecap="round" class="transition-all duration-700"></circle>
-                    </svg>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-                      <span class="text-xl font-black text-white number-font leading-none">${q.average.toFixed(2)}</span>
-                      <span class="text-[10px] text-slate-400 font-medium mt-0.5">/ 5.00</span>
-                    </div>
-                  </div>
-                  <div>
-                    <span class="text-xs text-slate-400 font-medium block">มาตรวัดความพึงพอใจ</span>
-                    <div class="text-base font-extrabold text-white mt-0.5">${pct.toFixed(1)}%</div>
-                    <span class="text-[11px] font-semibold mt-1 inline-block text-emerald-400">${interp.label}</span>
-                  </div>
-                </div>
-
-                <!-- Circular Star Donut -->
-                <div class="md:col-span-8 flex flex-col sm:flex-row items-center gap-4 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
-                  <div class="relative w-24 h-24 flex-shrink-0">
-                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                      <circle cx="50" cy="50" r="${dRadius}" fill="transparent" stroke="#1e293b" stroke-width="10"></circle>
-                      ${segmentsSvg}
-                    </svg>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-                      <span class="text-sm font-black text-white number-font leading-none">${q.count}</span>
-                      <span class="text-[10px] text-slate-400 mt-0.5">คนตอบ</span>
-                    </div>
-                  </div>
-                  <div class="flex-1 w-full grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    ${legendHtml}
-                  </div>
-                </div>
-              </div>
+            <div class="flex items-center space-x-1.5 bg-slate-900/90 px-2 py-1 rounded-xl border border-slate-800 text-[11px]">
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${s.color};"></span>
+              <span class="font-bold text-slate-300">${s.star}⭐</span>
+              <span class="text-slate-400 text-[10px] ml-1">${s.count} คน (${p}%)</span>
             </div>
           `;
         }).join('');
-      } else {
-        // RENDER LINEAR BAR CHARTS
-        container.innerHTML = questionAverages.map(q => {
-          const pct = (q.average / 5.0) * 100;
-          const interp = interpretLikert(q.average);
-          let barColor = 'from-emerald-500 to-teal-400';
-          if (q.average < 2.5) barColor = 'from-rose-500 to-orange-500';
-          else if (q.average < 3.5) barColor = 'from-amber-500 to-yellow-400';
 
-          return `
-            <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-750 transition hover:border-slate-600">
-              <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
-                <div class="flex items-center space-x-2">
-                  <span class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold flex items-center justify-center">
-                    ${q.num}
+        return `
+          <div class="bg-slate-900/75 p-5 rounded-2xl border border-slate-700/80 transition-all hover:border-slate-600 shadow-md">
+            <div class="flex flex-wrap justify-between items-start gap-2 mb-4">
+              <div class="flex items-start space-x-3 max-w-xl">
+                <span class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                  ${q.num}
+                </span>
+                <div>
+                  <h3 class="font-semibold text-slate-100 text-sm md:text-base leading-snug">
+                    ${q.title}
+                  </h3>
+                </div>
+              </div>
+
+              <div class="flex items-center space-x-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold border ${interp.class}">
+                  ${interp.label}
+                </span>
+                <div class="flex items-baseline space-x-1 font-mono">
+                  <span class="text-xl font-black text-white number-font">
+                    ${q.average.toFixed(2)}
                   </span>
-                  <span class="text-sm font-semibold text-slate-200">${q.title}</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                  <span class="px-2 py-0.5 rounded text-[11px] font-semibold border ${interp.class}">${interp.label}</span>
-                  <span class="text-base font-extrabold text-white number-font">${q.average.toFixed(2)}</span>
-                  <span class="text-xs text-slate-500">/ 5.00</span>
-                </div>
-              </div>
-
-              <!-- Progress Bar -->
-              <div class="w-full bg-slate-800 h-3.5 rounded-full overflow-hidden p-0.5 flex items-center mb-2">
-                <div class="bg-gradient-to-r ${barColor} h-full rounded-full transition-all duration-700" style="width: ${pct}%"></div>
-              </div>
-
-              <!-- 1-5 Vote Counts mini breakdown -->
-              <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                <span>การกระจายคะแนน:</span>
-                <div class="flex space-x-3">
-                  <span>1⭐: <strong class="text-slate-300">${q.distribution[1] || 0}</strong></span>
-                  <span>2⭐: <strong class="text-slate-300">${q.distribution[2] || 0}</strong></span>
-                  <span>3⭐: <strong class="text-slate-300">${q.distribution[3] || 0}</strong></span>
-                  <span>4⭐: <strong class="text-slate-300">${q.distribution[4] || 0}</strong></span>
-                  <span>5⭐: <strong class="text-emerald-400 font-bold">${q.distribution[5] || 0}</strong></span>
+                  <span class="text-xs text-slate-400">/ 5.0</span>
                 </div>
               </div>
             </div>
-          `;
-        }).join('');
-      }
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center pt-2 border-t border-slate-800">
+              <!-- Circular Score Gauge -->
+              <div class="md:col-span-4 flex items-center space-x-3.5 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
+                <div class="relative w-24 h-24 flex-shrink-0">
+                  <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="${radius}" fill="transparent" stroke="#1e293b" stroke-width="8"></circle>
+                    <circle cx="50" cy="50" r="${radius}" fill="transparent" stroke="${strokeColor}" stroke-width="8" stroke-dasharray="${circ}" stroke-dashoffset="${strokeOffset}" stroke-linecap="round" class="transition-all duration-700"></circle>
+                  </svg>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span class="text-xl font-black text-white number-font leading-none">${q.average.toFixed(2)}</span>
+                    <span class="text-[10px] text-slate-400 font-medium mt-0.5">/ 5.00</span>
+                  </div>
+                </div>
+                <div>
+                  <span class="text-xs text-slate-400 font-medium block">มาตรวัดความพึงพอใจ</span>
+                  <div class="text-base font-extrabold text-white mt-0.5">${pct.toFixed(1)}%</div>
+                  <span class="text-[11px] font-semibold mt-1 inline-block text-emerald-400">${interp.label}</span>
+                </div>
+              </div>
+
+              <!-- Circular Star Donut -->
+              <div class="md:col-span-8 flex flex-col sm:flex-row items-center gap-4 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
+                <div class="relative w-24 h-24 flex-shrink-0">
+                  <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="${dRadius}" fill="transparent" stroke="#1e293b" stroke-width="10"></circle>
+                    ${segmentsSvg}
+                  </svg>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span class="text-sm font-black text-white number-font leading-none">${q.count}</span>
+                    <span class="text-[10px] text-slate-400 mt-0.5">คนตอบ</span>
+                  </div>
+                </div>
+                <div class="flex-1 w-full grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  ${legendHtml}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function renderComments(comments) {

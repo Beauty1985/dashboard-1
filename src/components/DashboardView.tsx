@@ -35,7 +35,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onGoToSurvey
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [chartType, setChartType] = useState<'donut' | 'bar'>('donut');
   const [qrMiniDataUrl, setQrMiniDataUrl] = useState<string>('');
 
   useEffect(() => {
@@ -220,16 +219,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Main Grid: Bar Charts & Comments */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Left (2 Cols): Question Breakdown Charts (Circular Donut & Bar toggle) */}
+        {/* Left (2 Cols): Question Breakdown Circular Charts */}
         <div className="lg:col-span-2 bg-slate-800/70 border border-slate-700 rounded-3xl p-6 shadow-xl space-y-5">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <div className="flex items-center space-x-2">
-                {chartType === 'donut' ? (
-                  <PieChart className="w-5 h-5 text-indigo-400" />
-                ) : (
-                  <BarChart3 className="w-5 h-5 text-indigo-400" />
-                )}
+                <PieChart className="w-5 h-5 text-indigo-400" />
                 <h2 className="text-lg font-bold text-white">ผลคะแนนเฉลี่ยรายข้อ (1.00 – 5.00)</h2>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
@@ -237,41 +232,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </p>
             </div>
 
-            {/* View Switcher: Donut vs Bar */}
-            <div className="flex items-center space-x-2">
-              <div className="bg-slate-900/90 p-1 rounded-2xl border border-slate-700/80 flex items-center space-x-1">
-                <button
-                  type="button"
-                  onClick={() => setChartType('donut')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition ${
-                    chartType === 'donut'
-                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                  title="แสดงผลแบบกราฟวงกลม"
-                >
-                  <PieChart className="w-3.5 h-3.5" />
-                  <span>กราฟวงกลม</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setChartType('bar')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition ${
-                    chartType === 'bar'
-                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                  title="แสดงผลแบบกราฟแท่ง"
-                >
-                  <BarChart3 className="w-3.5 h-3.5" />
-                  <span>กราฟแท่ง</span>
-                </button>
-              </div>
-
-              <span className="text-xs px-3 py-1.5 bg-slate-700/80 text-slate-200 rounded-xl font-medium hidden sm:inline-block">
-                คะแนนเต็ม 5.00
-              </span>
-            </div>
+            <span className="text-xs px-3.5 py-1.5 bg-slate-700/80 text-slate-200 rounded-xl font-medium">
+              คะแนนเต็ม 5.00
+            </span>
           </div>
 
           {stats.totalResponses === 0 ? (
@@ -299,7 +262,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </button>
               </div>
             </div>
-          ) : chartType === 'donut' ? (
+          ) : (
             /* CIRCULAR GRAPH VIEW (DONUT & PIE CHARTS) */
             <div className="space-y-4">
               {stats.questionStats.map((q, idx) => {
@@ -489,68 +452,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                       </div>
 
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            /* LINEAR BAR CHART VIEW */
-            <div className="space-y-4">
-              {stats.questionStats.map((q, idx) => {
-                const percentage = (q.average / 5.0) * 100;
-
-                let gradientClass = 'from-emerald-500 to-teal-400';
-                if (q.average < 2.5) gradientClass = 'from-rose-500 to-red-500';
-                else if (q.average < 3.5) gradientClass = 'from-amber-500 to-yellow-400';
-                else if (q.average < 4.5) gradientClass = 'from-teal-500 to-emerald-400';
-
-                return (
-                  <div
-                    key={q.questionId}
-                    className="bg-slate-900/70 p-4 md:p-5 rounded-2xl border border-slate-700/80 transition-all hover:border-slate-600 shadow-md"
-                  >
-                    <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
-                      <div className="flex items-start space-x-3 max-w-xl">
-                        <span className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
-                          {idx + 1}
-                        </span>
-                        <div>
-                          <h3 className="font-semibold text-slate-100 text-sm leading-snug">
-                            {q.title}
-                          </h3>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${q.interpretation.badgeBg} ${q.interpretation.badgeText}`}>
-                          {q.interpretation.level}
-                        </span>
-                        <div className="flex items-baseline space-x-1 font-mono">
-                          <span className="text-lg md:text-xl font-black text-white">
-                            {q.average.toFixed(2)}
-                          </span>
-                          <span className="text-xs text-slate-400">/ 5.0</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="w-full bg-slate-800 h-4 rounded-full overflow-hidden p-0.5 flex items-center my-2 shadow-inner">
-                      <div
-                        className={`bg-gradient-to-r ${gradientClass} h-full rounded-full transition-all duration-700 shadow-sm`}
-                        style={{ width: `${Math.max(percentage, 4)}%` }}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                      <span>การกระจายคะแนน ({q.count} คน):</span>
-                      <div className="flex space-x-2 sm:space-x-4">
-                        <span>1⭐ <strong className="text-slate-300 font-mono">{q.distribution[1]}</strong></span>
-                        <span>2⭐ <strong className="text-slate-300 font-mono">{q.distribution[2]}</strong></span>
-                        <span>3⭐ <strong className="text-slate-300 font-mono">{q.distribution[3]}</strong></span>
-                        <span>4⭐ <strong className="text-slate-300 font-mono">{q.distribution[4]}</strong></span>
-                        <span>5⭐ <strong className="text-emerald-400 font-bold font-mono">{q.distribution[5]}</strong></span>
-                      </div>
                     </div>
                   </div>
                 );
